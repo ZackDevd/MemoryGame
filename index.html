@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Memory Speed Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #e0e0e0, #ffffff);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game-container {
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    #number-display {
+      font-size: 48px;
+      font-weight: bold;
+      color: #2d2d2d;
+      margin: 20px 0;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    select, input {
+      padding: 12px;
+      font-size: 18px;
+      margin: 10px;
+      width: calc(100% - 40px);
+      max-width: 320px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #007bff;
+    }
+
+    .buttons {
+      margin: 20px 0;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #score, #reaction-time {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .game-container {
+        padding: 20px;
+      }
+
+      #number-display {
+        font-size: 36px;
+        height: 50px;
+      }
+
+      input, select {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h2>🧠 Memory Speed Game</h2>
+    <select id="difficulty">
+      <option value="3">Easy (3-digit)</option>
+      <option value="4" selected>Medium (4-digit)</option>
+      <option value="5">Hard (5-digit)</option>
+      <option value="6">Extreme (6-digit)</option>
+    </select>
+
+    <div id="number-display">----</div>
+
+    <input type="text" id="user-input" placeholder="Enter number" disabled />
+
+    <div class="buttons">
+      <button onclick="startGame()">Start</button>
+      <button onclick="stopGame()">Stop</button>
+      <button onclick="checkNumber()" id="submit-btn" disabled>Submit</button>
+    </div>
+
+    <div id="score">Score: 0</div>
+    <div id="reaction-time">Time: 0.00s</div>
+  </div>
+
+  <script>
+    let currentNumber = '';
+    let score = 0;
+    let numberShownTime = 0;
+    let gameActive = false;
+    let digitLength = 4;
+
+    function getRandomPosition() {
+      return {
+        x: Math.random() * (window.innerWidth - 150),
+        y: Math.random() * (window.innerHeight - 100)
+      };
+    }
+
+    function generateNumber() {
+      if (!gameActive) return;
+
+      const min = Math.pow(10, digitLength - 1);
+      const max = Math.pow(10, digitLength) - 1;
+      currentNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      const numberDisplay = document.getElementById("number-display");
+      numberDisplay.innerText = currentNumber;
+
+      numberShownTime = Date.now();
+
+      setTimeout(() => {
+        numberDisplay.innerText = '----';
+      }, 2000);
+
+      const inputBox = document.getElementById("user-input");
+      inputBox.value = '';
+      inputBox.focus();
+    }
+
+    function checkNumber() {
+      if (!gameActive) return;
+
+      const userInput = document.getElementById("user-input").value.trim();
+      const now = Date.now();
+
+      if (userInput === currentNumber.toString()) {
+        const reactionTime = (now - numberShownTime) / 1000;
+        score++;
+        document.getElementById("score").innerText = "Score: " + score;
+        document.getElementById("reaction-time").innerText = `Time: ${reactionTime.toFixed(2)}s`;
+        generateNumber();
+      } else {
+        alert("Wrong! Try again.");
+      }
+    }
+
+    function startGame() {
+      const selectedDifficulty = document.getElementById("difficulty").value;
+      digitLength = parseInt(selectedDifficulty);
+
+      score = 0;
+      gameActive = true;
+      document.getElementById("score").innerText = "Score: 0";
+      document.getElementById("reaction-time").innerText = "Time: 0.00s";
+      document.getElementById("user-input").disabled = false;
+      document.getElementById("submit-btn").disabled = false;
+      generateNumber();
+    }
+
+    function stopGame() {
+      gameActive = false;
+      currentNumber = '';
+      document.getElementById("number-display").innerText = '----';
+      document.getElementById("user-input").disabled = true;
+      document.getElementById("submit-btn").disabled = true;
+    }
+
+    // Enter key = Submit
+    document.getElementById("user-input").addEventListener("keyup", function (event) {
+      if (event.key === "Enter") {
+        checkNumber();
+      }
+    });
+  </script>
+</body>
+</html>
